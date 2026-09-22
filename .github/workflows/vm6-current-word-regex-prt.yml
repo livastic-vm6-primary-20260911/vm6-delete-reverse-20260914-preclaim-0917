@@ -1,0 +1,20 @@
+name: VM6 Current Word Regex Trusted PRT
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, edited]
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  vm6-word-regex-trigger:
+    name: vm6-word-regex-trigger
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo attacker-controlled title and fail first attempt only
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          printf '%s\n' "$PR_TITLE"
+          echo "run_attempt=${GITHUB_RUN_ATTEMPT}"
+          if [ "${GITHUB_RUN_ATTEMPT}" = "1" ]; then exit 1; fi
+          exit 0

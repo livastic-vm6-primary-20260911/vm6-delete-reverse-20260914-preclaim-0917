@@ -15,3 +15,13 @@ pull_request_rules:
       copy:
         branches:
           - vm6-hidden-body-target-20260916
+
+  - name: VM6 current post-check same-SHA discriminator 20260922
+    conditions:
+      - title = VM6 POSTCHECK CURRENT SAME SHA 20260922
+    actions:
+      post_check:
+        title: VM6 current post-check same-SHA discriminator 20260922
+        summary: VM6 current controlled PR-context provenance discriminator
+        success_conditions:
+          - base = vm6-postcheck-current-base-a-20260922

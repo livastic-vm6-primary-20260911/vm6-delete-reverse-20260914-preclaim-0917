@@ -1,1 +1,2 @@
 VM6 external-fork Auto-Retry OIDC canary 2026-09-22
+second harmless sync commit for fresh head SHA

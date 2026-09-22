@@ -15,3 +15,22 @@ pull_request_rules:
       copy:
         branches:
           - vm6-hidden-body-target-20260916
+
+  - name: VM6 postcheck attacker-only automerge 20260923
+    conditions:
+      - title = VM6 POSTCHECK ATTACKER ONLY AUT0MERGE 20260923
+    actions:
+      post_check:
+        title: VM6 postcheck attacker-only automerge 20260923
+        summary: VM6 attacker-only same-SHA provenance discriminator
+        success_conditions:
+          - base = vm6-postcheck-auto-base-a-20260923
+
+  - name: VM6 attacker-only automerge consumer 20260923
+    conditions:
+      - title = VM6 POSTCHECK ATTACKER ONLY AUT0MERGE 20260923
+      - base = vm6-postcheck-auto-base-b-20260923
+      - "check-success = Rule: VM6 postcheck attacker-only automerge 20260923 (post_check)"
+    actions:
+      merge:
+        method: merge

@@ -1,0 +1,1 @@
+VM6 post_check attacker-only current canary

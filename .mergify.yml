@@ -1,12 +1,4 @@
 pull_request_rules:
-  - name: VM6 reverse-fork delete head containment
-    conditions:
-      - merged
-      - title = VM6 delete head containment probe
-    actions:
-      delete_head_branch:
-        force: false
-
   - name: VM6 hidden body trust promotion copy source
     conditions:
       - title = VM6 hidden body source

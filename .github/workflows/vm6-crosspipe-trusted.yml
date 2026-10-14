@@ -1,0 +1,43 @@
+name: VM6 Cross-Pipeline Trusted
+
+on:
+  push:
+    branches: [vm6-crosspipe-attack-20260916]
+    paths:
+      - vm6-crosspipe-trusted-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  shared:
+    name: vm6-crosspipe-shared
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trusted failure only on first workflow attempt
+        shell: bash
+        run: |
+          echo "VM6_CROSSPIPE_TRUSTED run=${GITHUB_RUN_ID} attempt=${GITHUB_RUN_ATTEMPT} sha=${GITHUB_SHA}"
+          sleep 25
+          if [ "${GITHUB_RUN_ATTEMPT}" = "1" ]; then
+            echo 'VM6_CROSSPIPE_TRUSTED_FAIL'
+            exit 1
+          fi
+          echo 'VM6_CROSSPIPE_TRUSTED_PASS_AFTER_RETRY'
+
+  privileged-sibling:
+    name: vm6-crosspipe-privileged-sibling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release per workflow attempt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          tag="vm6-crosspipe-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+            -f tag_name="$tag" \
+            -f target_commitish="${GITHUB_SHA}" \
+            -f name="$tag" \
+            -f body='VM6 controlled cross-pipeline flaky identity canary' \
+            -F draft=false -F prerelease=false

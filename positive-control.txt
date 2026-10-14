@@ -1,0 +1,2 @@
+same-repository positive control for Mergify delete_head_branch
+

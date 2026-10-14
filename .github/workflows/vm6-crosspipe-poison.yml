@@ -1,0 +1,17 @@
+name: VM6 Cross-Pipeline Poison
+
+on:
+  push:
+    branches: [vm6-crosspipe-attack-20260916]
+    paths:
+      - vm6-crosspipe-poison-trigger.txt
+
+jobs:
+  same-name-success:
+    name: vm6-crosspipe-shared
+    runs-on: ubuntu-latest
+    steps:
+      - name: Same-name success in a different pipeline
+        run: |
+          echo "VM6_CROSSPIPE_POISON_SUCCESS run=${GITHUB_RUN_ID} attempt=${GITHUB_RUN_ATTEMPT} sha=${GITHUB_SHA}"
+          exit 0

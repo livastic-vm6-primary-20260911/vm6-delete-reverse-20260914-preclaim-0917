@@ -1,0 +1,60 @@
+name: VM6 B CI Trace Exact-Target Control
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      MERGIFY_TOKEN: ${{ secrets.VM6_B_CI_TRACE_POSITIVE_261015 }}
+    steps:
+      - name: Validate separate-account CI key
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          const token = process.env.MERGIFY_TOKEN;
+          if (!token) throw Error('Missing temporary scoped B CI secret');
+          const res = await fetch('https://api.mergify.com/v1/application', {headers: {Authorization: 'Bearer ' + token}});
+          const x = await res.json().catch(() => ({}));
+          console.log('VM6_B_KEY_HTTP=' + res.status);
+          console.log('VM6_B_KEY_SCOPE=' + (x.scope ?? 'unknown'));
+          console.log('VM6_B_KEY_ACCOUNT=' + (x.account_scope?.login ?? 'unknown'));
+          if (!res.ok || x.scope !== 'ci' || x.account_scope?.login !== 'livastic-vm6-primary-20260911') throw Error('Key not bound to exact B account');
+          JS
+      - name: Write one harmless exact-target positive trace with official core
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null
+          npm install --silent --no-audit --no-fund @mergifyio/ci-core@0.3.4
+          cat > vm6-b-trace.mjs <<'JS'
+          import {createTracing, startSessionSpan, emitTestCaseSpan, endSessionSpan, generateTestRunId} from '@mergifyio/ci-core';
+          const destination = 'livastic-vm6-primary-20260911/vm6-delete-reverse-20260914-preclaim-0917';
+          const title = 'VM6_TRACE_ACCOUNT_FOREIGN_261015';
+          const testRunId = generateTestRunId();
+          console.log('VM6_B_TRACE_DEST=' + destination);
+          console.log('VM6_B_TRACE_TITLE=' + title);
+          console.log('VM6_B_TRACE_RUN_ID=' + testRunId);
+          const tracing = createTracing({
+            apiUrl: 'https://api.mergify.com',
+            repoName: destination,
+            token: process.env.MERGIFY_TOKEN,
+            testRunId,
+            frameworkAttributes: {'test.framework':'vitest','test.framework.version':'4.1.10'},
+            tracerName: 'vm6-owned-account-boundary'
+          });
+          if (!tracing) throw Error('Could not create official Mergify tracer');
+          const span = startSessionSpan(tracing, 'VM6 inert owned research account-boundary session');
+          emitTestCaseSpan(tracing.tracer, span, {
+            filepath:'vm6-trace-boundary.mjs',
+            absoluteFilepath:'/vm6-controlled/vm6-trace-boundary.mjs',
+            function:title, lineno:1, namespace:'security', scope:'case',
+            status:'passed', duration:33, startTime:Date.now()-60, retryCount:0, flaky:false
+          });
+          await endSessionSpan(tracing, span, 'passed');
+          console.log('VM6_B_TRACE_EXPORT_ACCEPTED_BY_SDK');
+          JS
+          node vm6-b-trace.mjs
